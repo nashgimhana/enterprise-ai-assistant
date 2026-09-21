@@ -237,19 +237,39 @@ Copy-Item .env.example .env
 
 Fill in the keys inside `.env`. Never commit the real `.env` file.
 
-### 4. Index the sample documents
+### 4. Run the minimum local app
 
-```bash
-python -m backend.rag.ingest
-```
+This first runnable version does not require OpenAI, Pinecone, or LangSmith keys. It uses local Markdown documents so the UI, API, auth, RBAC, guardrails, citations, memory, and activity panel can be tested immediately.
 
-### 5. Start the backend
+Start the backend:
 
 ```bash
 uvicorn backend.main:app --reload --port 8000
 ```
 
-### 6. Start the frontend
+Open a second terminal and start the frontend:
+
+```bash
+streamlit run frontend/app.py
+```
+
+Open `http://localhost:8501`.
+
+### 5. Index the sample documents
+
+This step belongs to the next Pinecone implementation phase.
+
+```bash
+python -m backend.rag.ingest
+```
+
+### 6. Start the backend
+
+```bash
+uvicorn backend.main:app --reload --port 8000
+```
+
+### 7. Start the frontend
 
 Open a second terminal:
 
