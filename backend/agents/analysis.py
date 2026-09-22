@@ -5,6 +5,8 @@ def analyze_documents(chunks: list[DocumentChunk], query: str) -> tuple[str, lis
     """
     Analysis/RLM Agent: Performs deep investigation and recursive exploration.
     
+    LangSmith tracing is automatic when environment variables are configured.
+    
     This agent demonstrates simplified Recursive Language Model concepts by:
     - Grouping retrieved documents into batches
     - Analyzing patterns across batches

@@ -28,5 +28,16 @@ LANGCHAIN_PROJECT = os.getenv("LANGCHAIN_PROJECT", "enterprise-ai-assistant")
 
 # Configure LangSmith tracing if enabled
 if LANGCHAIN_TRACING_V2 and LANGCHAIN_API_KEY:
-    import langchain
-    langchain.debug = True
+    os.environ["LANGCHAIN_TRACING_V2"] = "true"
+    os.environ["LANGCHAIN_API_KEY"] = LANGCHAIN_API_KEY
+    os.environ["LANGCHAIN_PROJECT"] = LANGCHAIN_PROJECT
+
+
+def get_llm():
+    """Get LangChain LLM instance with LangSmith tracing enabled."""
+    from langchain_openai import ChatOpenAI
+    return ChatOpenAI(
+        model="gpt-4o-mini",
+        temperature=0,
+        api_key=OPENAI_API_KEY if OPENAI_API_KEY else None,
+    )

@@ -112,6 +112,8 @@ def run_workflow(query: str, role: str) -> dict:
     """
     Execute the LangGraph workflow.
     
+    LangSmith tracing is automatic when environment variables are configured.
+    
     This is a simplified synchronous workflow that demonstrates the agent orchestration.
     In a full LangGraph implementation, this would use StateGraph with proper edges.
     

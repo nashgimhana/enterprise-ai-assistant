@@ -6,6 +6,8 @@ def retrieve_knowledge(query: str, role: str, limit: int = 4) -> tuple[list[Docu
     """
     Retrieval Agent: Performs RAG operations and vector search.
     
+    LangSmith tracing is automatic when environment variables are configured.
+    
     Args:
         query: User's question
         role: User's role for RBAC filtering
