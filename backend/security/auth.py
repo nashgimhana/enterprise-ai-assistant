@@ -40,7 +40,7 @@ def get_user(token: str) -> Optional[User]:
 
 def allowed_access_levels(role: str) -> set[str]:
     normalized_role = (role or "").lower().strip()
-    if normalized_role in {"admin", "analyst"}:
+    if normalized_role == "admin":
         return {"public", "internal", "restricted"}
     return {"public", "internal"}
 
