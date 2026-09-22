@@ -10,6 +10,11 @@ class Bucket:
 
 class TokenBucketRateLimiter:
     def __init__(self, capacity: int = 10, refill_per_second: float = 0.2) -> None:
+        if capacity <= 0:
+            raise ValueError("capacity must be greater than zero")
+        if refill_per_second < 0:
+            raise ValueError("refill_per_second cannot be negative")
+
         self.capacity = capacity
         self.refill_per_second = refill_per_second
         self._buckets: dict[str, Bucket] = {}
@@ -18,8 +23,8 @@ class TokenBucketRateLimiter:
         now = time.time()
         bucket = self._buckets.get(key)
         if bucket is None:
-            self._buckets[key] = Bucket(tokens=self.capacity - 1, updated_at=now)
-            return True
+            bucket = Bucket(tokens=self.capacity, updated_at=now)
+            self._buckets[key] = bucket
 
         elapsed = now - bucket.updated_at
         bucket.tokens = min(self.capacity, bucket.tokens + elapsed * self.refill_per_second)

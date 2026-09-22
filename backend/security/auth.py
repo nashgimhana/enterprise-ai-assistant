@@ -19,12 +19,17 @@ SESSIONS: dict[str, User] = {}
 
 
 def login(username: str, password: str) -> Optional[tuple[str, User]]:
-    record = USERS.get(username)
-    if not record or record["password"] != password:
+    normalized_username = (username or "").strip()
+    normalized_password = (password or "").strip()
+    if not normalized_username or not normalized_password:
+        return None
+
+    record = USERS.get(normalized_username)
+    if not record or record["password"] != normalized_password:
         return None
 
     token = str(uuid4())
-    user = User(username=username, role=record["role"])
+    user = User(username=normalized_username, role=record["role"])
     SESSIONS[token] = user
     return token, user
 
@@ -34,12 +39,12 @@ def get_user(token: str) -> Optional[User]:
 
 
 def allowed_access_levels(role: str) -> set[str]:
-    if role == "admin":
-        return {"public", "internal", "restricted"}
-    if role == "analyst":
+    normalized_role = (role or "").lower().strip()
+    if normalized_role in {"admin", "analyst"}:
         return {"public", "internal", "restricted"}
     return {"public", "internal"}
 
 
 def can_run_analysis(role: str) -> bool:
-    return role in {"analyst", "admin"}
+    normalized_role = (role or "").lower().strip()
+    return normalized_role in {"analyst", "admin"}

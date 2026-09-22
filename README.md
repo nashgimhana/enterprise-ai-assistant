@@ -255,13 +255,33 @@ streamlit run frontend/app.py
 
 Open `http://localhost:8501`.
 
-### 5. Index the sample documents
+### 5. Index the sample documents in Pinecone
 
-This step belongs to the next Pinecone implementation phase.
+The app works without this step by using local BM25 keyword search. To enable hybrid search with Pinecone vectors, set `PINECONE_API_KEY`, `PINECONE_INDEX_NAME`, and one embedding provider in `.env`, then run:
+
+For Gemini embeddings:
+
+```env
+EMBEDDING_PROVIDER=gemini
+GEMINI_API_KEY=your-gemini-key
+GEMINI_EMBEDDING_MODEL=gemini-embedding-2
+EMBEDDING_DIMENSION=1536
+```
+
+For OpenAI embeddings:
+
+```env
+EMBEDDING_PROVIDER=openai
+OPENAI_API_KEY=your-openai-key
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+EMBEDDING_DIMENSION=1536
+```
 
 ```bash
 python -m backend.rag.ingest
 ```
+
+The ingestion command chunks the Markdown documents, embeds each chunk, creates the Pinecone serverless index when needed, and upserts vectors with citation and access-control metadata.
 
 ### 6. Start the backend
 

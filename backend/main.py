@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 
 from backend.agents.supervisor import route_request
 from backend.config import APP_NAME, MAX_MESSAGE_LENGTH
-from backend.rag.local_search import search_documents
+from backend.rag.hybrid_search import search_documents
 from backend.security.auth import User, get_user, login
 from backend.security.guardrails import find_prompt_injection
 from backend.security.rate_limiter import TokenBucketRateLimiter
