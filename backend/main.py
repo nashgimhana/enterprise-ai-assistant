@@ -1,9 +1,8 @@
 from fastapi import Depends, FastAPI, Header, HTTPException, status
 from pydantic import BaseModel, Field
 
-from backend.agents.supervisor import route_request
 from backend.config import APP_NAME, MAX_MESSAGE_LENGTH
-from backend.rag.hybrid_search import search_documents
+from backend.graph.workflow import run_workflow
 from backend.security.auth import User, get_user, login
 from backend.security.guardrails import find_prompt_injection
 from backend.security.rate_limiter import TokenBucketRateLimiter
@@ -92,43 +91,36 @@ async def chat(payload: ChatRequest, user: User = Depends(current_user), authori
             history_length=len(MEMORY.get(token, [])),
         )
 
-    route, activity = route_request(payload.message, user.role)
-    if route == "forbidden_analysis":
+    # Run LangGraph workflow
+    state = run_workflow(payload.message, user.role)
+    
+    # Check if route was forbidden
+    if state["route"] == "forbidden_analysis":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Your role cannot run analysis tools")
 
-    chunks = search_documents(payload.message, user.role, limit=6 if route == "analysis" else 4)
-    activity.append("Knowledge search completed")
-    activity.append(f"Retrieved {len(chunks)} authorized chunks")
-
-    if not chunks:
-        answer = "I could not find supporting evidence in the available documents for your role."
-        citations: list[Citation] = []
-    elif route == "analysis":
-        activity.append("Analysis agent grouped retrieved evidence")
-        root_causes = "; ".join(chunk.title for chunk in chunks[:3])
-        answer = (
-            "Based on the available incident evidence, the recurring themes are database capacity, "
-            f"payment dependency timeouts, and operational recovery steps. Most relevant sources: {root_causes}."
+    # Extract citations from chunks
+    citations = [
+        Citation(
+            document_id=c["document_id"],
+            title=c["title"],
+            source=c["source"],
         )
-        citations = [Citation(document_id=c.document_id, title=c.title, source=c.source) for c in chunks]
-    else:
-        activity.append("Response agent generated grounded answer")
-        evidence = "\n\n".join(f"{chunk.title}: {chunk.content}" for chunk in chunks[:2])
-        answer = f"Based on the available documents:\n\n{evidence}"
-        citations = [Citation(document_id=c.document_id, title=c.title, source=c.source) for c in chunks]
+        for c in state["chunks"]
+    ]
 
+    # Update session memory
     MEMORY.setdefault(token, []).extend(
         [
             {"role": "user", "content": payload.message},
-            {"role": "assistant", "content": answer},
+            {"role": "assistant", "content": state["answer"]},
         ]
     )
-    activity.append("Session memory updated")
+    state["activity"].append("Session memory updated")
 
     return ChatResponse(
-        answer=answer,
-        route=route,
+        answer=state["answer"],
+        route=state["route"],
         citations=citations,
-        activity=activity,
+        activity=state["activity"],
         history_length=len(MEMORY[token]),
     )

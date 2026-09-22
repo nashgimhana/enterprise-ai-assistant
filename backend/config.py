@@ -20,3 +20,13 @@ PINECONE_NAMESPACE = os.getenv("PINECONE_NAMESPACE", "enterprise-docs")
 EMBEDDING_DIMENSION = int(os.getenv("EMBEDDING_DIMENSION", "1536"))
 CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "900"))
 CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "150"))
+
+# LangSmith Observability
+LANGCHAIN_TRACING_V2 = os.getenv("LANGCHAIN_TRACING_V2", "false").lower() == "true"
+LANGCHAIN_API_KEY = os.getenv("LANGCHAIN_API_KEY", "")
+LANGCHAIN_PROJECT = os.getenv("LANGCHAIN_PROJECT", "enterprise-ai-assistant")
+
+# Configure LangSmith tracing if enabled
+if LANGCHAIN_TRACING_V2 and LANGCHAIN_API_KEY:
+    import langchain
+    langchain.debug = True

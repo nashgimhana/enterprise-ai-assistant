@@ -28,6 +28,7 @@ class BM25Index:
         allowed_levels = allowed_access_levels(role)
         scored: list[DocumentChunk] = []
         for index, chunk in enumerate(self.chunks):
+            # RBAC filter: skip chunks not accessible to this role
             if chunk.access_level not in allowed_levels:
                 continue
 
